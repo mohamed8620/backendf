@@ -4,13 +4,36 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\Controller;
+use App\Models\PasswordResetCode;
+use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
+    public function sendResetCode(Request $request)
+    {
+        $request->validate(['email' => 'required|email|exists:users,email']);
+
+        $code = rand(100000, 999999);
+
+        PasswordResetCode::updateOrCreate(
+            ['email' => $request->email],
+            [
+                'code' => $code,
+                'expires_at' => now()->addMinutes(10),
+            ]
+        );
+
+        Mail::raw("Your reset code is: $code", function ($message) use ($request) {
+            $message->to($request->email)
+                ->subject('Reset Password Code');
+        });
+
+        return response()->json(['message' => 'Reset code sent.']);
+    }
     public function register(Request $request)
     {
         $request->validate([

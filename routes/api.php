@@ -12,6 +12,8 @@ use App\Http\Controllers\API\RayController;
 use App\Http\Controllers\API\AppointmentController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\DoctorController;
+use App\Http\Controllers\Auth\PasswordResetController;
+
 
 Route::post('/register', [AuthController::class, 'register']);
 
@@ -34,7 +36,11 @@ Route::post('/forgot-password', function (Request $request) {
 
     DB::table('password_reset_tokens')->updateOrInsert(
         ['email' => $request->email],
-        ['token' => bcrypt($code), 'created_at' => now()]
+        [
+            'token' => bcrypt($code),
+            'created_at' => now(),
+            'expires_at' => now()->addMinutes(10), // Token valid for 10 minutes
+        ]
     );
 
     Mail::raw("Your password reset code is: $code", function ($message) use ($request) {
@@ -42,13 +48,13 @@ Route::post('/forgot-password', function (Request $request) {
             ->subject('Password Reset Code');
     });
 
-    return response()->json(['message' => 'Reset code sent to your email.']);
+    return response()->json(['message' => 'Reset code sent to your email.'], 200);
 });
 
 Route::post('/verify-reset-code', function (Request $request) {
     $request->validate([
         'email' => 'required|email',
-        'code' => 'required|string'
+        'code' => 'required|string',
     ]);
 
     $record = DB::table('password_reset_tokens')
@@ -63,9 +69,12 @@ Route::post('/verify-reset-code', function (Request $request) {
         return response()->json(['message' => 'Invalid code.'], 400);
     }
 
-    return response()->json(['message' => 'Code verified successfully.']);
-});
+    if (isset($record->expires_at) && Carbon::parse($record->expires_at)->isPast()) {
+        return response()->json(['message' => 'Code has expired.'], 400);
+    }
 
+    return response()->json(['message' => 'Code verified successfully.'], 200);
+});
 
 Route::post('/reset-password', function (Request $request) {
     $request->validate([
@@ -78,8 +87,16 @@ Route::post('/reset-password', function (Request $request) {
         ->where('email', $request->email)
         ->first();
 
-    if (!$record || !Hash::check($request->code, $record->token)) {
-        return response()->json(['message' => 'Invalid reset attempt.'], 400);
+    if (!$record) {
+        return response()->json(['message' => 'Reset code not found.'], 404);
+    }
+
+    if (!Hash::check($request->code, $record->token)) {
+        return response()->json(['message' => 'Invalid code.'], 400);
+    }
+
+    if (Carbon::parse($record->expires_at)->isPast()) {
+        return response()->json(['message' => 'Reset code has expired.'], 400);
     }
 
     $user = \App\Models\User::where('email', $request->email)->first();
@@ -94,8 +111,9 @@ Route::post('/reset-password', function (Request $request) {
 
     DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-    return response()->json(['message' => 'Password has been reset successfully.']);
+    return response()->json(['message' => 'Password has been reset successfully.'], 200);
 });
+
 
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirectToProvider']);
 
