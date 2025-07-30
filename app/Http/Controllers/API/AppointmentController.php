@@ -102,4 +102,42 @@ class AppointmentController extends Controller
             ]
         ]);
     }
+    public function destroy($id)
+{
+    $appointment = Appointment::where('id', $id)
+        ->where('user_id', Auth::id()) // يتأكد إن اليوزر هو صاحب الحجز
+        ->where('status', 'booked')
+        ->first();
+
+    if (!$appointment) {
+        return response()->json([
+            'message' => 'Appointment not found or already canceled.'
+        ], 404);
+    }
+
+    $appointment->delete();
+
+    return response()->json([
+        'message' => 'Appointment cancelled successfully.'
+    ], 200);
+}
+public function getByEmail(Request $request)
+{
+    $email = $request->query('email');
+
+    if (!$email) {
+        return response()->json(['message' => 'Email is required'], 400);
+    }
+
+    $user = \App\Models\User::where('email', $email)->first();
+
+    if (!$user) {
+        return response()->json(['message' => 'Patient not found'], 404);
+    }
+
+    $appointments = \App\Models\Appointment::where('user_id', $user->id)->get();
+
+    return response()->json(['appointments' => $appointments]);
+}
+
 }
