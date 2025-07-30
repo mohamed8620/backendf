@@ -255,7 +255,7 @@ php artisan serve --host=YOUR_IP  # To access from external devices
 }
 
   * `200 OK` – Appointment cancelled successfully.
----
+
 
 ### GET `/api/me`
 
