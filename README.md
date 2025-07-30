@@ -22,15 +22,6 @@ php artisan serve    # Start app on localhost
 # Or:
 php artisan serve --host=YOUR_IP  # To access from external devices
 
-- composer install ( Required )
-
-- php artisan migrate ( Create DB ) Note: Start MySQL
-
-- php artisan serve to run app
-
-- php artisan serve --host=ip ( Other Option )
-
-
 ### POST `/api/register`
 
 * **Description:** Register a new user.
