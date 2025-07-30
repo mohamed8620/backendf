@@ -1,61 +1,369 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+- composer install ( Required )
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+- php artisan migrate ( Create DB ) Note: Start MySQL
 
-## About Laravel
+- php artisan serve to run app
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- php artisan serve --host=ip ( Other Option )
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### POST `/api/register`
 
-## Learning Laravel
+* **Description:** Register a new user.
+* **Auth:** Not required
+* **Request Body:**
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "secret",
+  "password_confirmation": "secret",
+  "age" : "30",
+  "gender":"male",
+  "phone_number":"02394848",
+  "role":"default: patient"
+}
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+* **Response:**
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+  * `201 Created` – User registered successfully.
+  * `422 Unprocessable Entity` – Validation failed.
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### POST `/api/login`
 
-### Premium Partners
+* **Description:** Log in a user and retrieve an access token.
+* **Auth:** Not required
+* **Request Body:**
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```json
+{
+  "email": "john@example.com",
+  "password": "secret"
+}
+```
 
-## Contributing
+* **Response:**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+  * `200 OK` – Login successful, token returned.
+  * `401 Unauthorized` – Invalid credentials.
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### POST `/api/logout`
 
-## Security Vulnerabilities
+* **Description:** Log out the current authenticated user.
+* **Auth:** Required (Bearer Token)
+* **Request Body:** *None*
+* **Response:**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+  * `200 OK` – Logout successful.
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### GET `/api/dashboard`
+
+* **Description:** Retrieve authenticated user dashboard info.
+* **Auth:** Required (Bearer Token)
+* **Request Body:** *None*
+* **Response:**
+
+  * `200 OK` – Dashboard data.
+
+---
+
+### POST `/api/forgot-password`
+
+* **Description:** Request password reset code via email.
+* **Auth:** Not required
+* **Request Body:**
+
+```json
+{
+  "email": "john@example.com"
+}
+```
+
+* **Response:**
+
+  * `200 OK` – Reset code sent.
+  * `404 Not Found` – Email not associated with any user.
+
+---
+
+### POST `/api/verify-reset-code`
+
+* **Description:** Verify the reset code sent via email.
+* **Auth:** Not required
+* **Request Body:**
+
+```json
+{
+  "email": "john@example.com",
+  "code": "123456"
+}
+```
+
+* **Response:**
+
+  * `200 OK` – Code verified.
+  * `400 Bad Request` – Invalid code.
+  * `404 Not Found` – No reset request found.
+
+---
+
+### POST `/api/reset-password`
+
+* **Description:** Reset the user password using the verification code.
+* **Auth:** Not required
+* **Request Body:**
+
+```json
+{
+  "email": "john@example.com",
+  "code": "123456",
+  "password": "newpassword",
+  "password_confirmation": "newpassword"
+}
+```
+
+* **Response:**
+
+  * `200 OK` – Password reset successful.
+  * `400 Bad Request` – Invalid reset attempt.
+
+---
+
+### GET `/api/auth/{provider}/redirect`
+
+* **Description:** Redirect to social auth provider.
+* **Auth:** Not required
+* **Response:**
+
+  * Redirect to provider login page.
+
+---
+
+### GET `/api/auth/{provider}/callback`
+
+* **Description:** Handle callback from social auth provider.
+* **Auth:** Not required
+* **Response:**
+
+  * `200 OK` – Authenticated and token returned.
+
+---
+
+### POST `/api/rays`
+
+* **Description:** Upload a ray image or information.
+* **Auth:** Required (Bearer Token)
+* **Request Body:
+```json
+{
+    "image": "required",
+    "temperature" :"37",
+    "systolic_bp" : "40",
+    "heart_rate" : "60",
+    "has_cough" : "true",
+    "has_headaches" :"true",
+    "can_smell_taste" : "true",
+}
+```
+* **Response:**
+
+  * `201 Created` – Ray uploaded.
+
+---
+
+### GET `/api/rays`
+
+* **Description:** Get list of rays for authenticated user.
+* **Auth:** Required (Bearer Token)
+* **Response:**
+
+  * `200 OK` – List of rays.
+
+---
+
+### POST `/api/appointments`
+
+* **Description:** Book an appointment with a doctor.
+* **Auth:** Required (Bearer Token)
+* **Request Body:**
+
+```json
+{
+  "doctor_id": 3,
+  "appointment_time": "2025-07-21 14:30:00"
+}
+```
+
+* **Response:**
+
+  * `201 Created` – Appointment booked.
+  * `409 Conflict` – Time slot already taken.
+
+---
+
+### GET `/api/appointments/available`
+
+* **Description:** View available appointment slots.
+* **Auth:** Not required
+* **Response:**
+
+  * `200 OK` – List of available slots.
+
+---
+
+### GET `/api/appointments/my`
+
+* **Description:** Get user's appointments.
+* **Auth:** Required (Bearer Token)
+* **Response:**
+
+  * `200 OK` – User appointments returned.
+
+---
+
+### GET `/api/me`
+
+* **Description:** Get authenticated user profile.
+* **Auth:** Required (Bearer Token)
+* **Response:**
+
+  * `200 OK` – Profile data.
+
+---
+
+### PUT `/api/me`
+
+* **Description:** Update authenticated user profile.
+* **Auth:** Required (Bearer Token)
+* **Request Body:
+```json
+{
+  "name": "John Doe",
+  "email": "john33@example.com",
+  "password": "secret",
+  "password_confirmation": "secret"
+  "age":"30",
+  "gender":"male",
+  "phone_number":"02394848",
+  "role":"default: patient",
+  
+}
+```
+* **Response:**
+
+  * `200 OK` – Profile updated.
+
+---
+
+### GET `/api/doctors`
+
+* **Description:** List all doctors.
+* **Auth:** Required (Bearer Token)
+* **Response:**
+
+  * `200 OK` – Doctors listed.
+
+---
+
+### GET `/api/doctor/patients`
+
+* **Description:** Get all patients for authenticated doctor.
+* **Auth:** Required (Bearer Token)
+* **Response:**
+
+  * `200 OK` – Patients listed.
+
+---
+
+### POST `/api/doctor/notes`
+
+* **Description:** Add a note to a patient.
+* **Auth:** Required (Bearer Token)
+* **Request Body:
+```json
+{
+  "patient_id": 5,
+  "note": "The patient has a mild fever and requires rest.",
+  "ray_id": "2"
+}
+```
+* **Response:**
+
+  * `201 Created` – Note added.
+
+---
+
+### PUT `/api/doctor/notes/{id}`
+
+* **Description:** Update a note.
+* **Auth:** Required (Bearer Token)
+* **Request Body:
+```json
+    {
+  "note": "Updated medical note text here"
+  
+}
+```
+* **Response:**
+  * `200 OK` – Note updated.
+
+---
+
+### DELETE `/api/doctor/notes/{id}`
+
+* **Description:** Delete a note.
+* **Auth:** Required (Bearer Token)
+* **Request Body:
+
+* **Response:**
+
+  * `200 OK` – Note deleted.
+
+---
+
+### GET `/api/doctor/patients/{id}/notes`
+
+* **Description:** Get all notes for a specific patient.
+* **Auth:** Required (Bearer Token)
+* **Request Body:
+
+
+* **Response:**
+
+
+  * `200 OK` – Notes returned.
+
+---
+
+### GET `/api/doctor/rays/{id}/ai`
+
+* **Description:** Get AI interpretation of a specific ray.
+* **Auth:** Required (Bearer Token)
+
+
+* **Response:**
+
+  * `200 OK` – AI results returned.
+
+---
+
+### POST `/api/doctor/patients/status`
+
+* **Description:** Set/update the status of a patient.
+* **Auth:** Required (Bearer Token)
+* **Request Body:** *(patient\_id, status, etc.)*
+* **Response:**
+
+  * `200 OK` – Status updated.
+
+---
+
+
