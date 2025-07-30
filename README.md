@@ -243,6 +243,19 @@ php artisan serve --host=YOUR_IP  # To access from external devices
   * `200 OK` – User appointments returned.
 
 ---
+### delete `/api/appointments/{id}`
+
+* **Description:** delete user's appointments.
+* **Auth:** Required (Bearer Token)
+* **Response:**
+* * **Request Body:
+```json
+    {
+"appointments-id":"4"
+}
+
+  * `200 OK` – Appointment cancelled successfully.
+---
 
 ### GET `/api/me`
 
@@ -323,6 +336,7 @@ php artisan serve --host=YOUR_IP  # To access from external devices
 * **Request Body:
 ```json
     {
+"note-id":"4",
   "note": "Updated medical note text here"
   
 }
@@ -337,7 +351,9 @@ php artisan serve --host=YOUR_IP  # To access from external devices
 * **Description:** Delete a note.
 * **Auth:** Required (Bearer Token)
 * **Request Body:
-
+* {
+* "note-id":"4"
+}
 * **Response:**
 
   * `200 OK` – Note deleted.
@@ -349,6 +365,8 @@ php artisan serve --host=YOUR_IP  # To access from external devices
 * **Description:** Get all notes for a specific patient.
 * **Auth:** Required (Bearer Token)
 * **Request Body:
+* 
+* 
 
 
 * **Response:**
@@ -362,6 +380,12 @@ php artisan serve --host=YOUR_IP  # To access from external devices
 
 * **Description:** Get AI interpretation of a specific ray.
 * **Auth:** Required (Bearer Token)
+* **Request Body:** *
+* {
+* "ray_id":"3"
+* 
+
+* }
 
 
 * **Response:**
@@ -374,7 +398,13 @@ php artisan serve --host=YOUR_IP  # To access from external devices
 
 * **Description:** Set/update the status of a patient.
 * **Auth:** Required (Bearer Token)
-* **Request Body:** *(patient\_id, status, etc.)*
+* **Request Body:** *
+* {
+* "patient_id":"3",
+* "status":"New,Regular,Follow-up,Critical"
+
+* }
+* 
 * **Response:**
 
   * `200 OK` – Status updated.
