@@ -1,3 +1,27 @@
+# 🏥 Medical API – Laravel Backend
+
+A powerful and clean RESTful API for a healthcare app built with Laravel.  
+Supports user registration, authentication, appointment booking, ray uploads, AI diagnostics, and doctor-patient interactions.
+
+---
+
+## 🚀 Getting Started
+
+### ✅ Requirements
+
+- PHP >= 8.2 or later
+- Composer
+- MySQL
+
+### 🛠 Installation
+
+```bash
+composer install
+php artisan migrate  # (Make sure MySQL is running)
+php artisan serve    # Start app on localhost
+# Or:
+php artisan serve --host=YOUR_IP  # To access from external devices
+
 - composer install ( Required )
 
 - php artisan migrate ( Create DB ) Note: Start MySQL
